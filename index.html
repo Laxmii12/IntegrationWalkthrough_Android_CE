@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Integration Walkthrough</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f4f4f4;
+      color: #333;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: linear-gradient(90deg, #32091e 0%, #8e3e53 35%, #b97a2b 100%);
+      color: white;
+      height: 60px;
+      padding: 0 24px;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .logo {
+      height: 90px;
+    }
+
+    .header-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: white;
+      margin-right: 30px;
+      user-select: none;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 15px;
+    }
+
+    .tab {
+      font-size: 16px;
+      font-weight: 500;
+      padding: 6px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      background: transparent;
+      border: 1px solid transparent;
+      color: #ffcc80;
+      user-select: none;
+      transition: background 0.3s, color 0.3s;
+    }
+    .tab:hover {
+      background: #ffcc80;
+      color: #4a2b2d;
+    }
+    .tab.active {
+      background: #ffcc80;
+      color: #4a2b2d;
+      border: 1px solid #ffcc80;
+      cursor: default;
+    }
+
+    .header-right {
+      display: flex;
+      gap: 10px;
+    }
+
+    .header-button {
+      background: none;
+      border: 1px solid #ffcc80;
+      color: #ffcc80;
+      padding: 6px 12px;
+      border-radius: 4px;
+      font-size: 13px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+      user-select: none;
+    }
+
+    .header-button:hover {
+      background: #ffcc80;
+      color: #4a2b2d;
+    }
+
+    .step-container {
+      display: flex;
+      width: 100vw;
+      height: calc(100vh - 60px);
+    }
+
+    .left-panel {
+      width: 30%;
+      padding: 20px;
+      background: linear-gradient(to bottom, rgb(243, 240, 240));
+      overflow-y: auto;
+      border-right: 1px solid #ddd;
+    }
+
+    .right-panel {
+      width: 70%;
+      background: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px;
+    }
+
+    .code-block {
+      background: #f9f9f9;
+      border: 1px solid #ccc;
+      padding: 10px;
+      border-radius: 8px;
+      font-family: monospace;
+      white-space: pre-wrap;
+      margin-top: 15px;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+
+    audio {
+      width: 100%;
+      margin-top: 10px;
+      display: none; /* Hide audio controls */
+    }
+
+    video {
+      width: 100%;
+      height: auto;
+      max-height: 100%;
+      border-radius: 8px;
+      background: #000;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="header-left">
+      <img class="logo" src="Netcore.png" alt="Logo" />
+      <div class="header-title">Integration Walkthrough</div>
+      <div class="tabs" id="frameworkTabs">
+        <div class="tab active" data-platform="native-ios">Native iOS</div>
+        <div class="tab" data-platform="react-native">React Native</div>
+        <!-- <div class="tab" data-platform="flutter">Flutter</div> -->
+      </div>
+    </div>
+    <div class="header-right">
+      <button class="header-button" id="prevButton">⏮ Previous</button>
+      <button class="header-button" id="playButton">▶ Play</button>
+      <button class="header-button" id="nextButton">⏭ Next</button>
+    </div>
+  </header>
+
+  <div class="step-container">
+    <div class="left-panel">
+      <h2 id="stepTitle">Step Title</h2>
+      <p id="stepDescription">Step description goes here.</p>
+      <div class="code-block" id="stepCode1"></div>
+      
+      <p id="stepDescription2" style="display: none;">Additional step description goes here.</p>
+      <div class="code-block" id="stepCode2" style="display: none;"></div>
+      <audio id="stepAudio">
+        <source id="stepAudioSrc" type="audio/mpeg" />
+      </audio>
+
+      <p id="stepDescription3" style="display: none;">Additional step description goes here.</p>
+      <div class="code-block" id="stepCode3" style="display: none;"></div>
+      <audio id="stepAudio">
+        <source id="stepAudioSrc" type="audio/mpeg" />
+      </audio>
+    </div>
+   
+  <!-- </div> -->
+    <div class="right-panel">
+      <video id="stepVideo" controls>
+        <source id="stepVideoSrc" type="video/mp4" />
+      </video>
+    </div>
+  </div>
+
+  <script>
+    const commonSteps = [
+    {
+  title: 'Step 1: Adding Smartech SDK dependency using CocoaPods',
+  description1: 'Navigate to your project and add the Smartech dependency.',
+  description2: 'Then install all the pods by running the following command in your project directory.',
+  code1: `pod 'Smartech-iOS-SDK', '~> 3.7.2'`,
+  code2: `pod install`,
+  audioSrc: 'Step1.mp3',
+  videoSrc: 'Step1.mp4'
+},
+
+      {
+        title: 'Step 2: Initialize Netcore SDK',
+        description1: 'Import smartech in App Delegate class.',
+        description2: 'Initialize the SDK in your project.',
+        description3:'Add the following snippet of a code  to the Main Target Info.plist file',
+        code1:'Import Smartech',
+        code2: `Smartech.sharedInstance().initSDK(with: self, withLaunchOptions: launchOptions)`,
+        code3: `<key>SmartechKeys</key>
+<dict>
+<key>SmartechAppGroup</key>
+<string>group.com.CompanyName.ProductName</string>
+<key>SmartechAppId</key>
+<string>abcdef123456abcdef123456abcd1234</string>
+<key>SmartechUseAdvId</key>
+<true/>
+<key>SmartechAutoFetchLocation</key>
+<true/>
+</dict>`,
+
+        audioSrc: 'Step2.mp3',
+        videoSrc: 'Step2.mp4'
+      },
+      // Add more common steps here if needed
+      // Add more steps as needed
+      {
+      title: 'Step 3: Adding SmartPush SDK dependency using CocoaPods',
+      description: 'In the Podfile add the SmartPush-iOS-SDK as a dependency.',
+      code1: `pod 'SmartPush-iOS-SDK', '~> 3.5.5'\n\npod install\n\nimport SmartPush`,
+      audioSrc: 'step3.mp3',
+      videoSrc: 'step3.mp4'
+    },
+    {
+      title: 'Step4: Adding and Configuring of Extensions in Your App',
+      description:' Add the following snippet to the Service Extensions Info.plist file.',
+      description2:'Modify NotificationService.swift class as shown below.',
+      code1: `<key>SmartechKeys</key>
+<dict>
+<key>SmartechAppGroup</key>
+<string>group.com.CompanyName.ProductName</string>
+<key>SmartechAppId</key>
+<string>abcdef123456abcdef123456abcd1234</string>
+<key>SmartechUseAdvId</key>
+<true/>
+<key>SmartechAutoFetchLocation</key>
+<true/>
+</dict>`,
+
+      code2: `import UserNotifications
+import SmartPush
+class NotificationService: UNNotificationServiceExtension {
+ let smartechServiceExtension = SMTNotificationServiceExtension()
+ override func didReceive(_ request: UNNotificationRequest, withContentHandler contentHandler: @escaping (UNNotificationContent) -> Void) {
+  if SmartPush.sharedInstance().isNotification(fromSmartech: request.content.userInfo) {
+    smartechServiceExtension.didReceive(request, withContentHandler: contentHandler)
+  }
+}
+ override func serviceExtensionTimeWillExpire() {
+  smartechServiceExtension.serviceExtensionTimeWillExpire()
+}
+}`,
+      audioSrc: 'Step4.mp3',
+      videoSrc: 'Step4.mp4'
+    },
+    {
+      title: 'Step5: Creating Content Extensions in Your App',
+      description: `Notification Content Extension is used only to display carousel notifications sent from Netcore CE.`,
+      code1: `<key>SmartechKeys</key>
+<dict>
+<key>SmartechAppGroup</key>
+<string>group.com.CompanyName.ProductName</string>
+<key>SmartechAppId</key>
+<string>abcdef123456abcdef123456abcd1234</string>
+<key>SmartechUseAdvId</key>
+<true/>
+<key>SmartechAutoFetchLocation</key>
+<true/>
+</dict>`,
+      code2: `import UIKit
+import SmartPush
+class NotificationViewController: SMTCustomNotificationViewController {
+   @IBOutlet var customPNView: UIView!
+   override func viewDidLoad() {
+      super.viewDidLoad()
+      self.customView = customPNView
+  }
+}`,
+      audioSrc: 'Step5.mp3',
+      videoSrc: 'Step5.mp4'
+    },
+    {
+      title: 'Step6: Creating StoryBoard',
+      description: 'Creating a storyboard inside a Content Extension in iOS development is necessary for customizing rich notifications.',
+      audioSrc: 'Step6.mp3',
+      videoSrc: 'Step6.mp4'
+    },
+    {
+  title: 'Step7: Configuring Content Extension Info.plist for Rich Notifications.',
+  description: `In your Content Extension's Info.plist under NSExtension -> NSExtensionAttributes:
+
+Change the UNNotificationExtensionCategory datatype to an Array with 3 values:
+a. Item 0: String with value "SmartechCarouselLandscapeNotification"
+b. Item 1: String with value "SmartechCarouselPortraitNotification"
+c. Item 2: String with value "SmartechPN"
+
+Add the following keys:
+- UNNotificationExtensionDefaultContentHidden: Boolean YES
+- UNNotificationExtensionUserInteractionEnabled: Boolean YES
+- UNNotificationExtensionInitialContentSizeRatio: Number 0.25`,
+  audioSrc: 'Step7.mp3',
+  videoSrc: 'Step7.mp4'
+},
+{
+      title: 'Step8: Enable app icon for custom push notifications.',
+      description: `By default, the Custom Push Notifications do not display the App Icon when expanded, unlike the default push notifications.To enable the App Icon visibility in the Custom Push Notifications, you must include the following steps:
+
+
+      1. Add your App Icon as image set in your assets of content extension.
+
+      2. In your Content Extensions Info.plist under SmartechKeys, add the SmartechNotificationIcon key with String value containing the name of the App Icon.
+       
+      The SDK will check for the SmartechNotificationIcon and render the UI. In case the icon is not passed or not found, then the notification will render, taking up the space of the icons.`,
+      audioSrc: 'Step8.mp3',
+      videoSrc: 'Step8.mp4'
+    },
+
+    {
+      title: 'Step9: AppDelegate Push Notification Methods',
+      description: 'To enable and manage push notifications in your iOS app, you need to implement a few essential methods inside the AppDelegate class. These methods handle the registration of the device with APNs (Apple Push Notification service), manage failures during registration, and process notifications received while the app is in the foreground or background.',
+      audioSrc: 'Step9.mp3',
+      videoSrc: 'Step9.mp4'
+    },
+
+  ];
+
+
+    // Platform-specific overrides for steps - use null for steps that are same as common
+    const platformOverrides = {
+      'native-ios': [
+        null,
+        // {
+        //   title: 'Native iOS Specific Init',
+        //   description: 'Initialize the SDK specifically for iOS with additional configs.',
+        //   code1: `Smartech.sharedInstance().initSDK(with: self, withLaunchOptions: launchOptions)`,
+        //   audioSrc: 'NativeIOSStep2.mp3',
+        //   videoSrc: 'NativeIOSStep2.mp4'
+        // }
+      ],
+      'react-native': [
+        {
+          title: 'Step 1: Installing Smartech Base React Native',
+          description: 'Netcore CE provides a React-native SDK that enables app developers to track and engage their users and view valuable analytical insights on our powerful CE dashboard.',
+          code1: `npm install smartech-base-react-native`,
+          audioSrc: 'rn-step1.mp3',
+          videoSrc: 'rn-step1.mp4'
+        },
+        {
+          title: 'Step 2: Installing Smartech Push React Native',
+          description: 'Install Netcore CE React Native plugin using the npm package manager. And then link your native dependencies.',
+          code1: `npm install smartech-push-react-native`,
+          audioSrc: 'rn-step2.mp3',
+          videoSrc: 'rn-step2.mp4'
+        },
+        {
+          title: 'Step 3: Retrieving Deeplink Data',
+          description: `The below method will provide the deep link value and the custom payload when a push notification is clicked.
+          Use the below code when your smartech-base-react-native version is 3.5.0 or above, & smartech-push-react-native version is 3.5.0 or above..`,
+          code1: `import SmartechReact from 'smartech-base-react-native';
+import SmartechPushReact from 'smartech-push-react-native';
+
+// Deeplink callback for Push Notification, InappMessage and AppInbox
+ SmartechReact.addListener(SmartechReact.SmartechDeeplink, handleDeeplinkWithPayload);
+
+const handleDeeplinkWithPayload = (smartechData) => {
+     console.log('Smartech Data :: ', smartechData);
+     console.log('Smartech Deeplink :: ', smartechData.smtDeeplink);
+     console.log('Smartech CustomPayload:: ', smartechData.smtCustomPayload);
+  };
+
+//Remove this listener on cleanup
+SmartechReact.removeListener(SmartechReact.SmartechDeeplink);
+`,
+          audioSrc: 'rn-step3.mp3',
+          videoSrc: 'rn-step3.mp4'
+        }
+      ],
+      // 'flutter': [
+      //   null,
+      //   // {
+      //   //   title: 'Flutter Step 2: Initialize SDK',
+      //   //   description: 'Initialize the SDK in your main.dart file.',
+      //   //   code1: `NetcoreFlutterSdk.initialize();`,
+      //   //   audioSrc: 'FlutterStep2.mp3',
+      //   //   videoSrc: 'FlutterStep2.mp4'
+      //   // }
+      // ]
+    };
+
+    function getStepsForPlatform(platform) {
+      const overrides = platformOverrides[platform] || [];
+      return commonSteps.map((step, idx) => overrides[idx] || step);
+    }
+
+    const audio = document.getElementById('stepAudio');
+    const audioSrc = document.getElementById('stepAudioSrc');
+    const video = document.getElementById('stepVideo');
+    const videoSrc = document.getElementById('stepVideoSrc');
+    const codeBlock1 = document.getElementById('stepCode1');
+    const codeBlock2 = document.getElementById('stepCode2');
+    const codeBlock3 = document.getElementById('stepCode3');
+
+    const stepTitle = document.getElementById('stepTitle');
+    const stepDescription = document.getElementById('stepDescription');
+
+    let currentPlatform = 'native-ios';
+    let currentSteps = getStepsForPlatform(currentPlatform);
+    let currentStep = 0;
+
+    function loadStep(index, startTime = 0) {
+  if (index < 0 || index >= currentSteps.length) return;
+  const step = currentSteps[index];
+
+  stepTitle.innerText = step.title;
+  stepDescription.innerText = step.description || '';
+  codeBlock1.innerText = step.code1 || '';
+
+  // Handle second description
+  const stepDescription2 = document.getElementById('stepDescription2');
+  if (step.description2) {
+    stepDescription2.innerText = step.description2;
+    stepDescription2.style.display = 'block';
+  } else {
+    stepDescription2.style.display = 'none';
+  }
+  // Handle third descrption
+  const stepDescription3 = document.getElementById('stepDescription3');
+  if (step.description3) {
+    stepDescription3.innerText = step.description3;
+    stepDescription3.style.display = 'block';
+  } else {
+    stepDescription3.style.display = 'none';
+  }
+
+  // Handle second code block
+  if (step.code2) {
+    codeBlock2.innerText = step.code2;
+    codeBlock2.style.display = 'block';
+  } else {
+    codeBlock2.style.display = 'none';
+  }
+
+  if (step.code3) {
+    codeBlock3.innerText = step.code3;
+    codeBlock3.style.display = 'block';
+  } else {
+    codeBlock3.style.display = 'none';
+  }
+
+  audioSrc.src = step.audioSrc || '';
+  videoSrc.src = step.videoSrc || '';
+  audio.load();
+  video.load();
+
+  audio.onloadedmetadata = () => { audio.currentTime = startTime; };
+  video.onloadedmetadata = () => { video.currentTime = startTime; };
+}
+
+
+    function playStep() {
+      audio.play();
+      video.play();
+    }
+
+    function pauseStep() {
+      audio.pause();
+      video.pause();
+    }
+
+    function nextStep() {
+      if (currentStep < currentSteps.length - 1) {
+        currentStep++;
+        loadStep(currentStep);
+        playStep();
+      } else {
+        alert('You have completed all steps!');
+      }
+    }
+
+    function previousStep() {
+      if (currentStep > 0) {
+        currentStep--;
+        loadStep(currentStep);
+        playStep();
+      }
+    }
+
+    document.getElementById('playButton').addEventListener('click', () => {
+      if (audio.paused) {
+        playStep();
+      } else {
+        pauseStep();
+      }
+    });
+    document.getElementById('nextButton').addEventListener('click', nextStep);
+    document.getElementById('prevButton').addEventListener('click', previousStep);
+
+    // Sync audio and video play/pause
+    audio.addEventListener('play', () => { if (video.paused) video.play(); });
+    video.addEventListener('play', () => { if (audio.paused) audio.play(); });
+
+    video.addEventListener('pause', () => { if (!audio.paused) audio.pause(); });
+    audio.addEventListener('pause', () => { if (!video.paused) video.pause(); });
+
+    video.addEventListener('seeking', () => {
+      audio.currentTime = video.currentTime;
+    });
+
+    // Tabs for frameworks
+    const tabs = document.querySelectorAll('.tab');
+    tabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        if (tab.classList.contains('active')) return;
+        tabs.forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        currentPlatform = tab.getAttribute('data-platform');
+        currentSteps = getStepsForPlatform(currentPlatform);
+        currentStep = 0;
+        loadStep(currentStep);
+      });
+    });
+
+    loadStep(currentStep);
+  </script>
+
+</body>
+</html>
