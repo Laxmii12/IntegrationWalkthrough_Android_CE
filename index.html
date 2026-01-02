@@ -145,11 +145,54 @@
 <body>
 
   <header>
+    <div id="introScreen" style="
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: linear-gradient(180deg, #32091e 0%, #8e3e53 50%, #b97a2b 100%);
+  color: white;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 40px;
+  text-align: center;
+  z-index: 9999;
+">
+
+  <h1 style="max-width: 800px; font-size: 26px; line-height: 1.5;">
+    Welcome to the Integration Video Walkthrough Guide.  
+    We will begin with the basic setup of the Smartech SDK.  
+    <br><br>
+    Please note that the SDK versions shown in this walkthrough are for reference only and may be outdated.  
+    We strongly recommend using the latest SDK versions available at the time of your integration.
+  </h1>
+
+  <!-- <audio id="introAudio" autoplay>
+    <source src="Introduction.mp3" type="audio/mpeg">
+  </audio> -->
+
+  <button id="startIntroButton" style="
+    margin-top: 40px;
+    padding: 12px 26px;
+    font-size: 16px;
+    background: #ffcc80;
+    color: #4a2b2d;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+  ">
+    Start Walkthrough
+  </button>
+
+</div>
+
     <div class="header-left">
       <img class="logo" src="Netcore.png" alt="Logo" />
       <div class="header-title">Integration Walkthrough</div>
       <div class="tabs" id="frameworkTabs">
-        <div class="tab active" data-platform="native-ios">Native iOS</div>
+        <div class="tab active" data-platform="native-ios">Native Android</div>
         <div class="tab" data-platform="react-native">React Native</div>
         <!-- <div class="tab" data-platform="flutter">Flutter</div> -->
       </div>
@@ -191,146 +234,197 @@
   <script>
     const commonSteps = [
     {
-  title: 'Step 1: Adding Smartech SDK dependency using CocoaPods',
-  description1: 'Navigate to your project and add the Smartech dependency.',
-  description2: 'Then install all the pods by running the following command in your project directory.',
-  code1: `pod 'Smartech-iOS-SDK', '~> 3.7.2'`,
-  code2: `pod install`,
-  audioSrc: 'Step1.mp3',
-  videoSrc: 'Step1.mp4'
+  title: 'Step 1: Integrate the latest Netcore CE SDK',
+  description: 'Make the following changes in the app-level or project level build.gradle based on your project structure.',
+  // description2: 'Add Below line of code in Dependecies Section.',
+  code1: `maven { url 'https://artifacts.netcore.co.in/artifactory/android' }'`,
+  code2: `implementation 'com.netcore.android:smartech-sdk:3.7.6'`,
+  audioSrc: 'android_step1.mp3',
+  videoSrc: 'android_step1.mp4'
 },
 
       {
-        title: 'Step 2: Initialize Netcore SDK',
-        description1: 'Import smartech in App Delegate class.',
-        description2: 'Initialize the SDK in your project.',
-        description3:'Add the following snippet of a code  to the Main Target Info.plist file',
-        code1:'Import Smartech',
-        code2: `Smartech.sharedInstance().initSDK(with: self, withLaunchOptions: launchOptions)`,
-        code3: `<key>SmartechKeys</key>
-<dict>
-<key>SmartechAppGroup</key>
-<string>group.com.CompanyName.ProductName</string>
-<key>SmartechAppId</key>
-<string>abcdef123456abcdef123456abcd1234</string>
-<key>SmartechUseAdvId</key>
-<true/>
-<key>SmartechAutoFetchLocation</key>
-<true/>
-</dict>`,
+        title: 'Step 2: Initialize Smartech SDK',
+        description: 'Put your Smartech panels app Id in the meta-data tag of your applications manifest file, It should be added within the application tag, but outside of any component within the application tag.',
+        description2: 'Add the below mentioned code in the onCreate() method of your Application class to Initialize the Smartech SDK.',
+       // description3:'Add the following snippet of a code  to the Main Target Info.plist file',
+        code1:'<meta-data android:name="SMT_APP_ID" android:value="df1558cddfe6737d68f7c6cf0bc02225" />',
+        code2: `@Override
+public  void  onCreate() {
+    super.onCreate();
+    Smartech.getInstance(new  WeakReference<>(context)).initializeSdk(this);
+}`,
 
-        audioSrc: 'Step2.mp3',
-        videoSrc: 'Step2.mp4'
+        audioSrc: 'android_step2.mp3',
+        videoSrc: 'android_step2.mov'
       },
       // Add more common steps here if needed
       // Add more steps as needed
       {
-      title: 'Step 3: Adding SmartPush SDK dependency using CocoaPods',
-      description: 'In the Podfile add the SmartPush-iOS-SDK as a dependency.',
-      code1: `pod 'SmartPush-iOS-SDK', '~> 3.5.5'\n\npod install\n\nimport SmartPush`,
-      audioSrc: 'step3.mp3',
-      videoSrc: 'step3.mp4'
-    },
-    {
-      title: 'Step4: Adding and Configuring of Extensions in Your App',
-      description:' Add the following snippet to the Service Extensions Info.plist file.',
-      description2:'Modify NotificationService.swift class as shown below.',
-      code1: `<key>SmartechKeys</key>
-<dict>
-<key>SmartechAppGroup</key>
-<string>group.com.CompanyName.ProductName</string>
-<key>SmartechAppId</key>
-<string>abcdef123456abcdef123456abcd1234</string>
-<key>SmartechUseAdvId</key>
-<true/>
-<key>SmartechAutoFetchLocation</key>
-<true/>
-</dict>`,
-
-      code2: `import UserNotifications
-import SmartPush
-class NotificationService: UNNotificationServiceExtension {
- let smartechServiceExtension = SMTNotificationServiceExtension()
- override func didReceive(_ request: UNNotificationRequest, withContentHandler contentHandler: @escaping (UNNotificationContent) -> Void) {
-  if SmartPush.sharedInstance().isNotification(fromSmartech: request.content.userInfo) {
-    smartechServiceExtension.didReceive(request, withContentHandler: contentHandler)
-  }
-}
- override func serviceExtensionTimeWillExpire() {
-  smartechServiceExtension.serviceExtensionTimeWillExpire()
-}
+      title: 'Step 3: Steps to Add a Test Device and Test App Features',
+      description: 'Add the following intent filter to the activity that you want to handle the deep link for adding a test device in the AndroidManifest.xml file.',
+      description2:'Changes in the Activity that is assigned to handle the deep link',
+      code1: `<intent-filter>
+<action android:name="android.intent.action.VIEW" />
+<category android:name="android.intent.category.DEFAULT" />
+<category android:name="android.intent.category.BROWSABLE" />
+<data android:scheme="<your-custom-scheme>"
+android:host="smartech_sdk_td" />
+</intent-filter>`,
+code2:`class YourActivity extends  AppCompatActivity {
+    ...
+    @Override
+    protected void onCreate(Bundle  savedInstanceState) {
+        ...
+        boolean isSmartechHandledDeeplink = Smartech.getInstance(new WeakReference<>(this)).isDeepLinkFromSmartech(getIntent());
+        if (!isSmartechHandledDeeplink) {
+        //Handle deeplink on app side
+        }
+        ...
+    }
+    ...
 }`,
-      audioSrc: 'Step4.mp3',
-      videoSrc: 'Step4.mp4'
+      audioSrc: 'android_step3.mp3',
+      videoSrc: 'android_step3.mov'
     },
     {
-      title: 'Step5: Creating Content Extensions in Your App',
-      description: `Notification Content Extension is used only to display carousel notifications sent from Netcore CE.`,
-      code1: `<key>SmartechKeys</key>
-<dict>
-<key>SmartechAppGroup</key>
-<string>group.com.CompanyName.ProductName</string>
-<key>SmartechAppId</key>
-<string>abcdef123456abcdef123456abcd1234</string>
-<key>SmartechUseAdvId</key>
-<true/>
-<key>SmartechAutoFetchLocation</key>
-<true/>
-</dict>`,
-      code2: `import UIKit
-import SmartPush
-class NotificationViewController: SMTCustomNotificationViewController {
-   @IBOutlet var customPNView: UIView!
-   override func viewDidLoad() {
-      super.viewDidLoad()
-      self.customView = customPNView
-  }
+      title: 'Step4: Integrate APN by performing below steps',
+      description:'Add SmartPush SDK dependency',
+     description2:'Send FCM token to Netcore CE SDK.',
+     description3:'HandlePushNotification in firebase message class',
+      code1: `implementation 'com.netcore.android:smartech-push:3.5.13'`,
+
+      code2: `try {
+  SmartPush smartPush = SmartPush.getInstance(new WeakReference<>(context));
+  smartPush.fetchAlreadyGeneratedTokenFromFCM();
+} catch (Exception e) {
+  Log.e(TAG, "Fetching FCM token failed.");
 }`,
-      audioSrc: 'Step5.mp3',
-      videoSrc: 'Step5.mp4'
+code3:`public class <YourFirebaseMessagingServiceClass> extends FirebaseMessagingService {
+
+    @Override
+    public void onNewToken(@NonNull String token) {
+        super.onNewToken(token);
+        SmartPush.getInstance(new WeakReference<Context>(this)).setDevicePushToken(token);
+        //<Your code>
+    }
+
+    @Override
+    public void onMessageReceived(@NonNull RemoteMessage remoteMessage) {
+        super.onMessageReceived(remoteMessage);
+          boolean isPushFromSmartech = SmartPush.getInstance(new WeakReference<Context>(context)).isNotificationFromSmartech(new JSONObject(remoteMessage.getData().toString()));
+          if(isPushFromSmartech){
+            SmartPush.getInstance(new WeakReference<>(getApplicationContext())).handlePushNotification(remoteMessage.getData().toString());
+          } else {
+            // Notification received from other sources
+          }
+    }
+}`,
+      audioSrc: 'android_step4.mp3',
+      videoSrc: 'android_step4.mov'
     },
     {
-      title: 'Step6: Creating StoryBoard',
-      description: 'Creating a storyboard inside a Content Extension in iOS development is necessary for customizing rich notifications.',
-      audioSrc: 'Step6.mp3',
-      videoSrc: 'Step6.mp4'
+      title: 'Step5: Retreive Deeplink Data',
+      description: `Implement a BroadcastReceiver for the Deeplinks.`,
+      description2:'Register the BroadcastReceiver inside the Application class.',
+      code1: `public class DeeplinkReceiver extends BroadcastReceiver {
+   @Override
+   public void onReceive(Context context, Intent intent) {
+       try {
+           Bundle bundleExtra = intent.getExtras();
+           if (bundleExtra != null) {
+               String deepLinkSource = bundleExtra.getString(SMTBundleKeys.SMT_KEY_DEEPLINK_SOURCE);
+               String deepLink = bundleExtra.getString(SMTBundleKeys.SMT_KEY_DEEPLINK);
+               String customPayload = bundleExtra.getString(SMTBundleKeys.SMT_KEY_CUSTOM_PAYLOAD);
+               if (deepLink != null && !deepLink.isEmpty()) {
+                   // handle deepLink for redirection. Here you can use deepLinkSource for redirection if required
+               }
+               if (customPayload != null && !customPayload.isEmpty()) {
+                   // handle your custom payload based on deeplink source like below if required
+               }
+           }
+       } catch (Throwable t) {
+           Log.e("DeeplinkReceiver", "Error occurred in deeplink:" + t.getLocalizedMessage());
+       }
+   }
+}
+'`,
+      code2:`DeeplinkReceiver deeplinkReceiver = new DeeplinkReceiver();
+IntentFilter filter = new IntentFilter("com.smartech.EVENT_PN_INBOX_CLICK");
+if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+   context.registerReceiver(deeplinkReceiver, filter, Context.RECEIVER_EXPORTED);
+} else {
+   context.registerReceiver(deeplinkReceiver, filter);
+}
+`,
+      audioSrc: 'android_step5.mp3',
+      videoSrc: 'android_step5.mov'
     },
-    {
-  title: 'Step7: Configuring Content Extension Info.plist for Rich Notifications.',
-  description: `In your Content Extension's Info.plist under NSExtension -> NSExtensionAttributes:
 
-Change the UNNotificationExtensionCategory datatype to an Array with 3 values:
-a. Item 0: String with value "SmartechCarouselLandscapeNotification"
-b. Item 1: String with value "SmartechCarouselPortraitNotification"
-c. Item 2: String with value "SmartechPN"
+//     {
+//       title: 'Step6: Retreive Deeplink Data',
+//       description: 'Implement a BroadcastReceiver for the Deeplinks.',
+//       code1: `public class DeeplinkReceiver extends BroadcastReceiver {
+//    @Override
+//    public void onReceive(Context context, Intent intent) {
+//        try {
+//            Bundle bundleExtra = intent.getExtras();
+//            if (bundleExtra != null) {
+//                String deepLinkSource = bundleExtra.getString(SMTBundleKeys.SMT_KEY_DEEPLINK_SOURCE);
+//                String deepLink = bundleExtra.getString(SMTBundleKeys.SMT_KEY_DEEPLINK);
+//                String customPayload = bundleExtra.getString(SMTBundleKeys.SMT_KEY_CUSTOM_PAYLOAD);
+//                if (deepLink != null && !deepLink.isEmpty()) {
+//                    // handle deepLink for redirection. Here you can use deepLinkSource for redirection if required
+//                }
+//                if (customPayload != null && !customPayload.isEmpty()) {
+//                    // handle your custom payload based on deeplink source like below if required
+//                }
+//            }
+//        } catch (Throwable t) {
+//            Log.e("DeeplinkReceiver", "Error occurred in deeplink:" + t.getLocalizedMessage());
+//        }
+//    }
+// }
+// `,
+//       audioSrc: 'Step6.mp3',
+//       videoSrc: 'Step6.mp4'
+//     },
+//     {
+//   title: 'Step6: Integrate Firebase Cloud Messaging in your app',
+//   description: `In your Content Extension's Info.plist under NSExtension -> NSExtensionAttributes:
 
-Add the following keys:
-- UNNotificationExtensionDefaultContentHidden: Boolean YES
-- UNNotificationExtensionUserInteractionEnabled: Boolean YES
-- UNNotificationExtensionInitialContentSizeRatio: Number 0.25`,
-  audioSrc: 'Step7.mp3',
-  videoSrc: 'Step7.mp4'
-},
-{
-      title: 'Step8: Enable app icon for custom push notifications.',
-      description: `By default, the Custom Push Notifications do not display the App Icon when expanded, unlike the default push notifications.To enable the App Icon visibility in the Custom Push Notifications, you must include the following steps:
+// Change the UNNotificationExtensionCategory datatype to an Array with 3 values:
+// a. Item 0: String with value "SmartechCarouselLandscapeNotification"
+// b. Item 1: String with value "SmartechCarouselPortraitNotification"
+// c. Item 2: String with value "SmartechPN"
+
+// Add the following keys:
+// - UNNotificationExtensionDefaultContentHidden: Boolean YES
+// - UNNotificationExtensionUserInteractionEnabled: Boolean YES
+// - UNNotificationExtensionInitialContentSizeRatio: Number 0.25`,
+//   audioSrc: 'Step7.mp3',
+//   videoSrc: 'Step7.mp4'
+// },
+// {
+//       title: 'Step8: Enable app icon for custom push notifications.',
+//       description: `By default, the Custom Push Notifications do not display the App Icon when expanded, unlike the default push notifications.To enable the App Icon visibility in the Custom Push Notifications, you must include the following steps:
 
 
-      1. Add your App Icon as image set in your assets of content extension.
+//       1. Add your App Icon as image set in your assets of content extension.
 
-      2. In your Content Extensions Info.plist under SmartechKeys, add the SmartechNotificationIcon key with String value containing the name of the App Icon.
+//       2. In your Content Extensions Info.plist under SmartechKeys, add the SmartechNotificationIcon key with String value containing the name of the App Icon.
        
-      The SDK will check for the SmartechNotificationIcon and render the UI. In case the icon is not passed or not found, then the notification will render, taking up the space of the icons.`,
-      audioSrc: 'Step8.mp3',
-      videoSrc: 'Step8.mp4'
-    },
+//       The SDK will check for the SmartechNotificationIcon and render the UI. In case the icon is not passed or not found, then the notification will render, taking up the space of the icons.`,
+//       audioSrc: 'Step8.mp3',
+//       videoSrc: 'Step8.mp4'
+//     },
 
-    {
-      title: 'Step9: AppDelegate Push Notification Methods',
-      description: 'To enable and manage push notifications in your iOS app, you need to implement a few essential methods inside the AppDelegate class. These methods handle the registration of the device with APNs (Apple Push Notification service), manage failures during registration, and process notifications received while the app is in the foreground or background.',
-      audioSrc: 'Step9.mp3',
-      videoSrc: 'Step9.mp4'
-    },
+//     {
+//       title: 'Step9: AppDelegate Push Notification Methods',
+//       description: 'To enable and manage push notifications in your iOS app, you need to implement a few essential methods inside the AppDelegate class. These methods handle the registration of the device with APNs (Apple Push Notification service), manage failures during registration, and process notifications received while the app is in the foreground or background.',
+//       audioSrc: 'Step9.mp3',
+//       videoSrc: 'Step9.mp4'
+//     },
 
   ];
 
@@ -396,11 +490,112 @@ SmartechReact.removeListener(SmartechReact.SmartechDeeplink);
       //   // }
       // ]
     };
+   // -------------------------------------------------------------------------------------------------------------------------------------
 
-    function getStepsForPlatform(platform) {
-      const overrides = platformOverrides[platform] || [];
-      return commonSteps.map((step, idx) => overrides[idx] || step);
-    }
+   // INTRO LOGIC
+const introScreen = document.getElementById('introScreen');
+const introAudio = document.getElementById('introAudio');
+const startIntroButton = document.getElementById('startIntroButton');
+
+// Add safe audio start on user interaction
+startIntroButton.addEventListener('click', async () => {
+  try {
+    await introAudio.play();   // Attempt to play audio
+  } catch (e) {
+    console.log("Autoplay blocked, showing manual play button.");
+
+    // Create manual play button if autoplay is blocked
+    const manualPlayBtn = document.createElement("button");
+    manualPlayBtn.innerText = "▶ Play Intro Audio";
+    manualPlayBtn.style.cssText = `
+      margin-top: 20px;
+      padding: 10px 20px;
+      background: #ffcc80;
+      color: #4a2b2d;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 16px;
+    `;
+
+    manualPlayBtn.onclick = async () => {
+      await introAudio.play();
+      manualPlayBtn.remove();
+    };
+
+    introScreen.appendChild(manualPlayBtn);
+  }
+
+  // Hide intro screen AFTER starting audio
+  introScreen.style.display = "none";
+
+  // Load first step
+  loadStep(currentStep);
+});
+
+//original
+    // function getStepsForPlatform(platform) {
+    //   const overrides = platformOverrides[platform] || [];
+    //   return commonSteps.map((step, idx) => overrides[idx] || step);
+    // }
+//--------------
+//     function getStepsForPlatform(platform) {
+//   // React Native selected
+//   if (platform === 'react-native') {
+//     const rnSteps = platformOverrides['react-native'] || [];
+
+//     // Filter native steps → remove Step 5
+//     const filteredNativeSteps = commonSteps.filter(step => {
+//       return !step.title.startsWith('Step5');
+//     });
+
+//     return [...rnSteps, ...filteredNativeSteps];
+//   }
+
+//   // Native selected → show all native steps
+//   return commonSteps;
+// }
+//----------
+function getStepsForPlatform(platform) {
+  // Native flow → unchanged
+  if (platform === 'native-ios') {
+    return commonSteps;
+  }
+
+  // React Native flow
+  if (platform === 'react-native') {
+    const rnSteps = platformOverrides['react-native'] || [];
+
+    // RN Step 3 (last step)
+    const rnStep3 = rnSteps[2];
+
+    // RN Step 1 & 2
+    const rnInitialSteps = rnSteps.slice(0, 2);
+
+    // Native steps without Step 5
+    const nativeSteps = commonSteps.filter(step => {
+      return !step.title.startsWith('Step5');
+    });
+
+    // Final ordered steps
+    const finalSteps = [
+      ...rnInitialSteps,
+      ...nativeSteps,
+      rnStep3
+    ];
+
+    // 🔁 Renumber steps sequentially
+    return finalSteps.map((step, index) => ({
+      ...step,
+      title: step.title.replace(/^Step\s*\d+:/, `Step ${index + 1}:`)
+    }));
+  }
+
+  return commonSteps;
+}
+
+
+    
 
     const audio = document.getElementById('stepAudio');
     const audioSrc = document.getElementById('stepAudioSrc');
@@ -424,6 +619,8 @@ SmartechReact.removeListener(SmartechReact.SmartechDeeplink);
   stepTitle.innerText = step.title;
   stepDescription.innerText = step.description || '';
   codeBlock1.innerText = step.code1 || '';
+
+ 
 
   // Handle second description
   const stepDescription2 = document.getElementById('stepDescription2');
