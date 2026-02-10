@@ -18,7 +18,7 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      background: linear-gradient(90deg, #32091e 0%, #8e3e53 35%, #b97a2b 100%);
+      background: #230f2e;
       color: white;
       height: 60px;
       padding: 0 24px;
@@ -55,18 +55,23 @@
       cursor: pointer;
       background: transparent;
       border: 1px solid transparent;
-      color: #ffcc80;
+      color: white;
       user-select: none;
       transition: background 0.3s, color 0.3s;
     }
+    .tabsdkversion{
+      text-decoration: none;   /* removes underline */
+  color: inherit;          /* removes blue color */
+  cursor: pointer; 
+    }
     .tab:hover {
-      background: #ffcc80;
-      color: #4a2b2d;
+      background: #FC5E02;
+      color: white;
     }
     .tab.active {
-      background: #ffcc80;
-      color: #4a2b2d;
-      border: 1px solid #ffcc80;
+      background: #FC5E02;
+      color: white;
+      border: 1px solid #FC5E02;
       cursor: default;
     }
 
@@ -77,8 +82,8 @@
 
     .header-button {
       background: none;
-      border: 1px solid #ffcc80;
-      color: #ffcc80;
+      border: 1px solid #FC5E02;
+      color: white;
       padding: 6px 12px;
       border-radius: 4px;
       font-size: 13px;
@@ -88,8 +93,8 @@
     }
 
     .header-button:hover {
-      background: #ffcc80;
-      color: #4a2b2d;
+      background: #FC5E02;
+      color: white;
     }
 
     .step-container {
@@ -98,8 +103,38 @@
       height: calc(100vh - 60px);
     }
 
+    .sidebar {
+      width: 250px;
+      min-width: 200px;
+      background: #f8f9fa;
+      border-right: 1px solid #ddd;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .sidebar-item {
+      padding: 15px 20px;
+      cursor: pointer;
+      border-bottom: 1px solid #e9ecef;
+      font-size: 14px;
+      color: #555;
+      transition: background 0.2s;
+    }
+
+    .sidebar-item:hover {
+      background: #e9ecef;
+    }
+
+    .sidebar-item.active {
+      background: #FC5E02;
+      color: white;
+      font-weight: 600;
+      border-left: 4px solid #230f2e;
+    }
+
     .left-panel {
-      width: 30%;
+      width: 35%;
       padding: 20px;
       background: linear-gradient(to bottom, rgb(243, 240, 240));
       overflow-y: auto;
@@ -107,7 +142,7 @@
     }
 
     .right-panel {
-      width: 70%;
+      flex: 1;
       background: #fff;
       display: flex;
       align-items: center;
@@ -150,7 +185,7 @@
   top: 0; left: 0;
   width: 100vw;
   height: 100vh;
-  background: linear-gradient(180deg, #32091e 0%, #8e3e53 50%, #b97a2b 100%);
+  background: #230f2e;
   color: white;
   display: flex;
   flex-direction: column;
@@ -160,6 +195,8 @@
   text-align: center;
   z-index: 9999;
 ">
+
+  <img src="assets/netcorelogo.png" alt="Netcore Logo" style="height: 5%; width: auto; margin-bottom: 20px;">
 
   <h1 style="max-width: 800px; font-size: 26px; line-height: 1.5;">
     Welcome to the Integration Video Walkthrough Guide.  
@@ -177,8 +214,8 @@
     margin-top: 40px;
     padding: 12px 26px;
     font-size: 16px;
-    background: #ffcc80;
-    color: #4a2b2d;
+    background: #FC5E02;
+    color: white;
     border: none;
     border-radius: 6px;
     cursor: pointer;
@@ -194,6 +231,9 @@
       <div class="tabs" id="frameworkTabs">
         <div class="tab active" data-platform="native-ios">Native Android</div>
         <div class="tab" data-platform="react-native">React Native</div>
+        <div class="tab" data-platform="usecases">Use Cases</div>
+        <div class="tab" data-platform="sdkversion"><a class="tabsdkversion" target="_blank" href="https://cdnt.netcoresmartech.com/smartechapp-team/sdk-versions/smartech-sdk-versions.html?v=1.0.0"
+> Latest SDK Version</a></div>
         <!-- <div class="tab" data-platform="flutter">Flutter</div> -->
       </div>
     </div>
@@ -205,6 +245,9 @@
   </header>
 
   <div class="step-container">
+    <div class="sidebar" id="stepSidebar">
+      <!-- Sidebar items will be injected here -->
+    </div>
     <div class="left-panel">
       <h2 id="stepTitle">Step Title</h2>
       <p id="stepDescription">Step description goes here.</p>
@@ -228,6 +271,20 @@
       <video id="stepVideo" controls>
         <source id="stepVideoSrc" type="video/mp4" />
       </video>
+    </div>
+  </div>
+
+  <div class="step-container" id="useCasesContainer" style="display: none;">
+    <div class="sidebar" id="useCasesSidebar">
+      <div class="sidebar-item" style="cursor: default; font-weight: bold; background: #e9ecef;">Event Tracking(recommended)</div>
+      <div class="sidebar-item" onclick="loadUseCase('usecases/eventtracking/smartechsetuseridusecase.html', this)">Smartech setUserIdentity</div>
+      <div class="sidebar-item" onclick="loadUseCase('usecases/eventtracking/smartechlogin.html', this)">Smartech Login</div>
+      
+      <div class="sidebar-item" style="cursor: default; font-weight: bold; background: #e9ecef; border-top: 1px solid #ddd;">User Tracking(recommended)</div>
+      <!-- Add items later -->
+    </div>
+    <div class="right-panel" style="display: block; padding: 0;">
+       <iframe id="useCaseFrame" style="width: 100%; height: 100%; border: none;" src=""></iframe>
     </div>
   </div>
 
@@ -290,16 +347,16 @@ code2:`class YourActivity extends  AppCompatActivity {
     {
       title: 'Step4: Integrate APN by performing below steps',
       description:'Add SmartPush SDK dependency',
-     description2:'Send FCM token to Netcore CE SDK.',
+    //  description2:'Send FCM token to Netcore CE SDK.',
      description3:'HandlePushNotification in firebase message class',
       code1: `implementation 'com.netcore.android:smartech-push:3.5.13'`,
 
-      code2: `try {
-  SmartPush smartPush = SmartPush.getInstance(new WeakReference<>(context));
-  smartPush.fetchAlreadyGeneratedTokenFromFCM();
-} catch (Exception e) {
-  Log.e(TAG, "Fetching FCM token failed.");
-}`,
+//       code2: `try {
+//   SmartPush smartPush = SmartPush.getInstance(new WeakReference<>(context));
+//   smartPush.fetchAlreadyGeneratedTokenFromFCM();
+// } catch (Exception e) {
+//   Log.e(TAG, "Fetching FCM token failed.");
+// }`,
 code3:`public class <YourFirebaseMessagingServiceClass> extends FirebaseMessagingService {
 
     @Override
@@ -510,8 +567,8 @@ startIntroButton.addEventListener('click', async () => {
     manualPlayBtn.style.cssText = `
       margin-top: 20px;
       padding: 10px 20px;
-      background: #ffcc80;
-      color: #4a2b2d;
+      background: #FC5E02;
+      color: white;
       border: none;
       border-radius: 6px;
       cursor: pointer;
@@ -611,9 +668,55 @@ function getStepsForPlatform(platform) {
     let currentPlatform = 'native-ios';
     let currentSteps = getStepsForPlatform(currentPlatform);
     let currentStep = 0;
+    
+    const stepSidebar = document.getElementById('stepSidebar');
+
+    function renderSidebar() {
+      stepSidebar.innerHTML = '';
+      currentSteps.forEach((step, index) => {
+        const item = document.createElement('div');
+        item.className = 'sidebar-item';
+        item.innerText = step.title;
+        item.onclick = () => {
+          currentStep = index;
+          loadStep(currentStep);
+          playStep();
+        };
+        stepSidebar.appendChild(item);
+      });
+    }
+
+    function updateSidebarHighlight(index) {
+      const items = stepSidebar.getElementsByClassName('sidebar-item');
+      for (let i = 0; i < items.length; i++) {
+        if (i === index) {
+          items[i].classList.add('active');
+          items[i].scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        } else {
+          items[i].classList.remove('active');
+        }
+      }
+    }
+
+    function saveState() {
+      try {
+        const state = {
+          platform: currentPlatform,
+          stepIndex: currentStep,
+          useCaseUrl: currentPlatform === 'usecases' ? document.getElementById('useCaseFrame').getAttribute('src') : null,
+          useCaseActiveItemText: currentPlatform === 'usecases' ? document.querySelector('#useCasesSidebar .sidebar-item.active')?.innerText : null
+        };
+        localStorage.setItem('walkthroughState', JSON.stringify(state));
+      } catch (e) {
+        console.error('Failed to save state', e);
+      }
+    }
 
     function loadStep(index, startTime = 0) {
   if (index < 0 || index >= currentSteps.length) return;
+  
+  updateSidebarHighlight(index);
+
   const step = currentSteps[index];
 
   stepTitle.innerText = step.title;
@@ -647,6 +750,8 @@ function getStepsForPlatform(platform) {
     codeBlock2.style.display = 'none';
   }
 
+
+  saveState();
   if (step.code3) {
     codeBlock3.innerText = step.code3;
     codeBlock3.style.display = 'block';
@@ -713,6 +818,72 @@ function getStepsForPlatform(platform) {
       audio.currentTime = video.currentTime;
     });
 
+    function loadUseCase(url, element) {
+        document.getElementById('useCaseFrame').src = url;
+        
+        // Update active state in sidebar
+        const items = document.querySelectorAll('#useCasesSidebar .sidebar-item');
+        items.forEach(item => item.classList.remove('active'));
+        
+        if (element) {
+            element.classList.add('active');
+        } else {
+            // Helper to find matching sidebar item if element not provided
+             items.forEach(item => {
+                if (item.getAttribute('onclick') && item.getAttribute('onclick').includes(url)) {
+                    item.classList.add('active');
+                }
+            });
+        }
+        saveState();
+    }
+
+    function init() {
+      const savedState = localStorage.getItem('walkthroughState');
+      if (savedState) {
+        try {
+          // Hide intro screen if we have saved state (returning user)
+          document.getElementById('introScreen').style.display = 'none';
+          
+          const state = JSON.parse(savedState);
+          // Restore platform
+          if (state.platform) {
+             currentPlatform = state.platform;
+             tabs.forEach(t => {
+                t.classList.remove('active');
+                if (t.getAttribute('data-platform') === currentPlatform) {
+                    t.classList.add('active');
+                }
+             });
+          }
+
+          const stepContainer = document.querySelector('.step-container');
+          const useCasesContainer = document.getElementById('useCasesContainer');
+
+          if (currentPlatform === 'usecases') {
+                stepContainer.style.display = 'none';
+                useCasesContainer.style.display = 'flex';
+                const url = state.useCaseUrl || 'usecases/eventtracking/smartechsetuseridusecase.html';
+                loadUseCase(url);
+          } else {
+                stepContainer.style.display = 'flex';
+                useCasesContainer.style.display = 'none';
+                currentSteps = getStepsForPlatform(currentPlatform);
+                currentStep = state.stepIndex || 0;
+                renderSidebar();
+                loadStep(currentStep); // This calls saveState, which is fine
+          }
+        } catch(e) {
+            console.error('Error restoring state', e);
+            renderSidebar();
+            loadStep(currentStep);
+        }
+      } else {
+         renderSidebar();
+         loadStep(currentStep);
+      }
+    }
+
     // Tabs for frameworks
     const tabs = document.querySelectorAll('.tab');
     tabs.forEach(tab => {
@@ -721,13 +892,43 @@ function getStepsForPlatform(platform) {
         tabs.forEach(t => t.classList.remove('active'));
         tab.classList.add('active');
         currentPlatform = tab.getAttribute('data-platform');
-        currentSteps = getStepsForPlatform(currentPlatform);
-        currentStep = 0;
-        loadStep(currentStep);
+        
+        const stepContainer = document.querySelector('.step-container');
+        const useCasesContainer = document.getElementById('useCasesContainer');
+
+        if (currentPlatform === 'usecases') {
+            stepContainer.style.display = 'none';
+            useCasesContainer.style.display = 'flex';
+            
+            // Default load if empty
+            const frame = document.getElementById('useCaseFrame');
+            // If we are switching to usecases tab, load default if nothing loaded, 
+            // OR always load default/saved?
+            // User requirement: "when I click on usecase it should by default land me on smartechsetuseidneity page"
+            // This implies a reset or specific default.
+            // Let's verify if there's a saved URL for usecases specifically?
+            // But if I clicked the tab, I probably want to see the main thing or where I left off.
+            // Let's implement: If src is blank or about:blank, load default. 
+            // AND ensure state is saved.
+            
+            if (!frame.getAttribute('src') || frame.getAttribute('src') === '') {
+                 loadUseCase('usecases/eventtracking/smartechsetuseridusecase.html');
+            } else {
+                 saveState(); // Update state to say we are now in usecases
+            }
+        } else {
+            stepContainer.style.display = 'flex';
+            useCasesContainer.style.display = 'none';
+            currentSteps = getStepsForPlatform(currentPlatform);
+            currentStep = 0; // Reset step when switching platforms? Or restore? 
+                             // Usually reset is safer when switching expressly.
+            renderSidebar();
+            loadStep(currentStep);
+        }
       });
     });
 
-    loadStep(currentStep);
+    init();
   </script>
 
 </body>
