@@ -18,7 +18,7 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      background: linear-gradient(90deg, #32091e 0%, #8e3e53 35%, #b97a2b 100%);
+      background: #230f2e;
       color: white;
       height: 60px;
       padding: 0 24px;
@@ -55,7 +55,7 @@
       cursor: pointer;
       background: transparent;
       border: 1px solid transparent;
-      color: #ffcc80;
+      color: white;
       user-select: none;
       transition: background 0.3s, color 0.3s;
     }
@@ -65,13 +65,13 @@
   cursor: pointer; 
     }
     .tab:hover {
-      background: #ffcc80;
-      color: #4a2b2d;
+      background: #FC5E02;
+      color: white;
     }
     .tab.active {
-      background: #ffcc80;
-      color: #4a2b2d;
-      border: 1px solid #ffcc80;
+      background: #FC5E02;
+      color: white;
+      border: 1px solid #FC5E02;
       cursor: default;
     }
 
@@ -82,8 +82,8 @@
 
     .header-button {
       background: none;
-      border: 1px solid #ffcc80;
-      color: #ffcc80;
+      border: 1px solid #FC5E02;
+      color: white;
       padding: 6px 12px;
       border-radius: 4px;
       font-size: 13px;
@@ -93,8 +93,8 @@
     }
 
     .header-button:hover {
-      background: #ffcc80;
-      color: #4a2b2d;
+      background: #FC5E02;
+      color: white;
     }
 
     .step-container {
@@ -127,10 +127,10 @@
     }
 
     .sidebar-item.active {
-      background: #ffcc80;
-      color: #4a2b2d;
+      background: #FC5E02;
+      color: white;
       font-weight: 600;
-      border-left: 4px solid #b97a2b;
+      border-left: 4px solid #230f2e;
     }
 
     .left-panel {
@@ -185,7 +185,7 @@
   top: 0; left: 0;
   width: 100vw;
   height: 100vh;
-  background: linear-gradient(180deg, #32091e 0%, #8e3e53 50%, #b97a2b 100%);
+  background: #230f2e;
   color: white;
   display: flex;
   flex-direction: column;
@@ -195,6 +195,8 @@
   text-align: center;
   z-index: 9999;
 ">
+
+  <img src="assets/netcorelogo.png" alt="Netcore Logo" style="height: 5%; width: auto; margin-bottom: 20px;">
 
   <h1 style="max-width: 800px; font-size: 26px; line-height: 1.5;">
     Welcome to the Integration Video Walkthrough Guide.  
@@ -212,8 +214,8 @@
     margin-top: 40px;
     padding: 12px 26px;
     font-size: 16px;
-    background: #ffcc80;
-    color: #4a2b2d;
+    background: #FC5E02;
+    color: white;
     border: none;
     border-radius: 6px;
     cursor: pointer;
@@ -565,8 +567,8 @@ startIntroButton.addEventListener('click', async () => {
     manualPlayBtn.style.cssText = `
       margin-top: 20px;
       padding: 10px 20px;
-      background: #ffcc80;
-      color: #4a2b2d;
+      background: #FC5E02;
+      color: white;
       border: none;
       border-radius: 6px;
       cursor: pointer;
