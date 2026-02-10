@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smartech Login & Event Tracking Flow</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #ffffff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden;
+        }
+
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background: #230f2e;
+            padding: 10px 20px;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .header-logo {
+            height: 40px;
+            width: auto;
+        }
+
+        .container {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            padding-top: 60px;
+        }
+
+        .scene {
+            position: absolute;
+            width: 100%;
+            height: calc(100% - 60px);
+            top: 60px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            opacity: 0;
+            transition: opacity 0.8s ease-in-out;
+            padding: 40px 20px 250px 20px;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .scene.active {
+            opacity: 1;
+            pointer-events: auto;
+            z-index: 10;
+        }
+
+        .title {
+            font-size: 36px;
+            font-weight: bold;
+            color: #230f2e;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .subtitle {
+            font-size: 24px;
+            color: #230f2e;
+            margin-bottom: 20px;
+            text-align: center;
+            max-width: 900px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 10px 20px;
+            border-radius: 10px;
+            border: 2px solid #FC5E02;
+        }
+
+        .flow-container {
+            display: flex;
+            gap: 30px;
+            align-items: center;
+            margin: 25px 0;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .flow-box {
+            background: white;
+            border: 3px solid #230f2e;
+            border-radius: 12px;
+            padding: 20px;
+            min-width: 200px;
+            text-align: center;
+            box-shadow: 0 5px 20px rgba(35, 15, 46, 0.2);
+        }
+
+        .flow-box-highlight {
+            background: #230f2e;
+            color: white;
+            border: 3px solid #FC5E02;
+        }
+
+        .flow-icon {
+            font-size: 60px;
+            margin-bottom: 15px;
+        }
+
+        .flow-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #230f2e;
+            margin-bottom: 10px;
+        }
+
+        .flow-box-highlight .flow-title {
+            color: #FC5E02;
+        }
+
+        .flow-arrow {
+            font-size: 60px;
+            color: #FC5E02;
+        }
+
+        .code-section {
+            background: #f5f5f5;
+            border: 3px solid #FC5E02;
+            border-radius: 15px;
+            padding: 30px;
+            margin: 30px 0;
+            max-width: 800px;
+            width: 100%;
+        }
+
+        .code-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #230f2e;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .code-block {
+            background: #230f2e;
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 18px;
+            line-height: 1.8;
+            margin: 15px 0;
+            position: relative;
+        }
+
+        .code-comment {
+            color: #a0a0a0;
+            font-style: italic;
+        }
+
+        .code-highlight {
+            background: #FC5E02;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-weight: bold;
+        }
+
+        .step-number {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background: #FC5E02;
+            color: white;
+            border-radius: 50%;
+            font-weight: bold;
+            font-size: 24px;
+            margin-right: 15px;
+        }
+
+        .sequence-container {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+            max-width: 900px;
+            margin: 30px 0;
+        }
+
+        .sequence-step {
+            display: flex;
+            align-items: center;
+            background: white;
+            border: 3px solid #230f2e;
+            border-radius: 15px;
+            padding: 25px;
+            transition: all 0.3s ease;
+        }
+
+        .sequence-step:hover {
+            transform: translateX(10px);
+            box-shadow: 0 5px 20px rgba(252, 94, 2, 0.3);
+        }
+
+        .sequence-content {
+            flex: 1;
+        }
+
+        .sequence-title {
+            font-size: 22px;
+            font-weight: bold;
+            color: #230f2e;
+            margin-bottom: 10px;
+        }
+
+        .sequence-description {
+            font-size: 16px;
+            color: #666;
+        }
+
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 30px;
+            max-width: 1200px;
+            margin: 30px 0;
+        }
+
+        .comparison-card {
+            background: white;
+            border: 3px solid #230f2e;
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .comparison-card-highlight {
+            background: #230f2e;
+            color: white;
+        }
+
+        .comparison-icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+        }
+
+        .comparison-title {
+            font-size: 32px;
+            font-weight: bold;
+            color: #230f2e;
+            margin-bottom: 20px;
+        }
+
+        .comparison-card-highlight .comparison-title {
+            color: #FC5E02;
+        }
+
+        .comparison-text {
+            font-size: 18px;
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .comparison-card-highlight .comparison-text {
+            color: white;
+        }
+
+        .benefit-box {
+            background: #fff;
+            border: 2px solid #FC5E02;
+            padding: 25px;
+            margin: 20px 0;
+            border-radius: 8px;
+            max-width: 800px;
+            font-size: 24px;
+            color: #230f2e;
+            font-weight: 500;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #e0e0e0;
+            position: fixed;
+            bottom: 70px;
+            left: 0;
+            z-index: 1000;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: #FC5E02;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .voiceover-text {
+            position: fixed;
+            bottom: 90px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(35, 15, 46, 0.95);
+            color: white;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 18px;
+            max-width: 90%;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            border: 2px solid #FC5E02;
+            z-index: 1000;
+        }
+
+        .navigation {
+            position: fixed;
+            bottom: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .nav-button {
+            background: #230f2e;
+            color: white;
+            border: 2px solid #FC5E02;
+            padding: 10px 20px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .nav-button:hover {
+            background: #FC5E02;
+            transform: scale(1.05);
+        }
+
+        .nav-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .nav-button:disabled:hover {
+            background: #230f2e;
+            transform: scale(1);
+        }
+
+        .page-indicator {
+            background: white;
+            color: #230f2e;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 18px;
+            border: 2px solid #230f2e;
+        }
+
+        .docs-section {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 30px;
+            max-width: 1000px;
+            margin-top: 40px;
+        }
+
+        .doc-card {
+            background: white;
+            border: 3px solid #FC5E02;
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .doc-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(252, 94, 2, 0.3);
+        }
+
+        .doc-icon {
+            font-size: 60px;
+            margin-bottom: 15px;
+        }
+
+        .doc-title {
+            font-size: 28px;
+            font-weight: bold;
+            color: #230f2e;
+            margin-bottom: 15px;
+        }
+
+        .doc-link {
+            color: #FC5E02;
+            text-decoration: none;
+            font-size: 16px;
+            word-break: break-all;
+            display: block;
+            margin-top: 10px;
+        }
+
+        .doc-link:hover {
+            text-decoration: underline;
+        }
+
+        .important-note {
+            background: #fff3cd;
+            border-left: 6px solid #FC5E02;
+            border: 2px solid #FC5E02;
+            padding: 25px;
+            margin: 30px 0;
+            border-radius: 8px;
+            max-width: 900px;
+        }
+
+        .important-note-title {
+            font-size: 28px;
+            font-weight: bold;
+            color: #230f2e;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .important-note-text {
+            font-size: 20px;
+            color: #230f2e;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <img src="../../assets/netcorelogo.png" class="header-logo" alt="NETCORE">
+    </div>
+
+    <div class="container">
+        <!-- Scene 1: Introduction -->
+        <div class="scene active" id="scene1">
+            <div class="title">User Authentication Tracking</div>
+            <div class="subtitle">smartech.login() & trackEvent() Implementation</div>
+            <div class="flow-container" style="margin-top: 60px;">
+                <div class="flow-box flow-box-highlight">
+                    <div class="flow-icon">👤</div>
+                    <div class="flow-title">User Login</div>
+                </div>
+                <div class="flow-arrow">+</div>
+                <div class="flow-box flow-box-highlight">
+                    <div class="flow-icon">📝</div>
+                    <div class="flow-title">User Registration</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Scene 2: Existing User Login Flow -->
+        <div class="scene" id="scene2">
+            <div class="title">Existing User Login Flow</div>
+            <div class="subtitle">When a user successfully logs into the app</div>
+            
+            <div class="sequence-container">
+                <div class="sequence-step">
+                    <div class="step-number">1</div>
+                    <div class="sequence-content">
+                        <div class="sequence-title">User Enters Credentials</div>
+                        <div class="sequence-description">User provides email/username and password</div>
+                    </div>
+                </div>
+
+                <div class="sequence-step">
+                    <div class="step-number">2</div>
+                    <div class="sequence-content">
+                        <div class="sequence-title">Authentication Successful</div>
+                        <div class="sequence-description">Backend validates credentials and returns success</div>
+                    </div>
+                </div>
+
+                <div class="sequence-step" style="background: #230f2e; color: white;">
+                    <div class="step-number">3</div>
+                    <div class="sequence-content">
+                        <div class="sequence-title" style="color: #FC5E02;">Call smartech.login(userId)</div>
+                        <div class="sequence-description" style="color: white;">Identify the user in Smartech system</div>
+                    </div>
+                </div>
+
+                <div class="sequence-step" style="background: #230f2e; color: white;">
+                    <div class="step-number">4</div>
+                    <div class="sequence-content">
+                        <div class="sequence-title" style="color: #FC5E02;">Call smartech.trackEvent("user_login", payload)</div>
+                        <div class="sequence-description" style="color: white;">Track the login event with user data</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Scene 3: Login Code Example -->
+        <div class="scene" id="scene3">
+            <div class="title">Existing User Login - Code</div>
+            <div class="subtitle">Example Implementation after successful authentication</div>
+
+            <div class="code-section">
+                <div class="code-title">📱 Step-by-Step Implementation</div>
+                
+                <div class="code-block">
+<span class="code-comment">// After successful authentication</span>
+<span class="code-comment">// Step 1: Identify the user</span>
+<span class="code-highlight">smartech.login(userId)</span>;
+
+<span class="code-comment">// Step 2: Track the login event</span>
+const payload = {
+  user_id: userId,
+  email: userEmail,
+  name: userName,
+  login_time: new Date().toISOString()
+};
+
+<span class="code-highlight">smartech.trackEvent("user_login", payload)</span>;
+                </div>
+            </div>
+
+            <div class="important-note">
+                <div class="important-note-title">⚠️ Important Order</div>
+                <div class="important-note-text">
+                    Always call <strong>smartech.login(userId)</strong> FIRST, then call <strong>trackEvent("user_login")</strong>
+                </div>
+            </div>
+        </div>
+
+        <!-- Scene 4: New User Registration Flow -->
+        <div class="scene" id="scene4">
+            <div class="title">New User Registration Flow</div>
+            <div class="subtitle">When a new user signs up for the app</div>
+            
+            <div class="sequence-container">
+                <div class="sequence-step">
+                    <div class="step-number">1</div>
+                    <div class="sequence-content">
+                        <div class="sequence-title">User Fills Registration Form</div>
+                        <div class="sequence-description">User provides email, password, name, etc.</div>
+                    </div>
+                </div>
+
+                <div class="sequence-step">
+                    <div class="step-number">2</div>
+                    <div class="sequence-content">
+                        <div class="sequence-title">Account Created Successfully</div>
+                        <div class="sequence-description">Backend creates account and returns userId</div>
+                    </div>
+                </div>
+
+                <div class="sequence-step" style="background: #230f2e; color: white;">
+                    <div class="step-number">3</div>
+                    <div class="sequence-content">
+                        <div class="sequence-title" style="color: #FC5E02;">Call smartech.login(userId)</div>
+                        <div class="sequence-description" style="color: white;">Identify the new user in Smartech system</div>
+                    </div>
+                </div>
+
+                <div class="sequence-step" style="background: #230f2e; color: white;">
+                    <div class="step-number">4</div>
+                    <div class="sequence-content">
+                        <div class="sequence-title" style="color: #FC5E02;">Call smartech.trackEvent("user_registration", payload)</div>
+                        <div class="sequence-description" style="color: white;">Track the registration event with user data</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Scene 5: Registration Code Example -->
+        <div class="scene" id="scene5">
+            <div class="title">New User Registration - Code</div>
+            <div class="subtitle">Example Implementation after successful signup/registration</div>
+
+            <div class="code-section">
+                <div class="code-title">📱 Step-by-Step Implementation</div>
+                
+                <div class="code-block">
+<span class="code-comment">// After successful registration</span>
+<span class="code-comment">// Step 1: Identify the user</span>
+<span class="code-highlight">smartech.login(userId)</span>;
+
+<span class="code-comment">// Step 2: Track the registration event</span>
+const payload = {
+  user_id: userId,
+  email: userEmail,
+  name: userName,
+  registration_time: new Date().toISOString(),
+  signup_source: "mobile_app"
+};
+
+<span class="code-highlight">smartech.trackEvent("user_registration", payload)</span>;
+                </div>
+            </div>
+
+            <div class="important-note">
+                <div class="important-note-title">⚠️ Important Order</div>
+                <div class="important-note-text">
+                    Always call <strong>smartech.login(userId)</strong> FIRST, then call <strong>trackEvent("user_registration")</strong>
+                </div>
+            </div>
+        </div>
+
+        <!-- Scene 6: Comparison -->
+        <div class="scene" id="scene6">
+            <div class="title">Login vs Registration</div>
+            <div class="subtitle">Two scenarios, same pattern</div>
+
+            <div class="comparison-grid">
+                <div class="comparison-card comparison-card-highlight">
+                    <div class="comparison-icon">🔑</div>
+                    <div class="comparison-title">Existing User Login</div>
+                    <div class="comparison-text">
+                        1️⃣ smartech.login(userId)<br/>
+                        2️⃣ trackEvent("user_login", payload)
+                    </div>
+                </div>
+
+                <div class="comparison-card comparison-card-highlight">
+                    <div class="comparison-icon">✍️</div>
+                    <div class="comparison-title">New User Registration</div>
+                    <div class="comparison-text">
+                        1️⃣ smartech.login(userId)<br/>
+                        2️⃣ trackEvent("user_registration", payload)
+                    </div>
+                </div>
+            </div>
+
+            <div class="important-note" style="margin-top: 50px;">
+                <div class="important-note-title">💡 Key Insight</div>
+                <div class="important-note-text">
+                    Both flows use <strong>smartech.login(userId)</strong> first to identify the user, followed by the appropriate tracking event
+                </div>
+            </div>
+        </div>
+
+        <!-- Scene 7: Benefits -->
+        <div class="scene" id="scene7">
+            <div class="title">Why This Approach?</div>
+            <div class="subtitle">Benefits of proper authentication tracking</div>
+
+            <div class="benefit-box">
+                ✓ <strong>User Identification:</strong> smartech.login() ensures the user is properly identified in the system
+            </div>
+            <div class="benefit-box">
+                ✓ <strong>Event Attribution:</strong> Events are correctly attributed to the identified user
+            </div>
+            <div class="benefit-box">
+                ✓ <strong>User Journey Tracking:</strong> Complete visibility into user authentication patterns
+            </div>
+            <div class="benefit-box">
+                ✓ <strong>Personalization:</strong> Enable personalized experiences based on login/registration data
+            </div>
+            <div class="benefit-box">
+                ✓ <strong>Analytics:</strong> Track conversion rates, login frequency, and user engagement
+            </div>
+        </div>
+
+        <!-- Scene 8: Complete Flow Example -->
+        <div class="scene" id="scene8">
+            <div class="title">Complete Flow Example</div>
+            <div class="subtitle">Full implementation in context</div>
+
+            <div class="code-section">
+                <div class="code-title">🔐 Login Flow</div>
+                <div class="code-block">
+ function handleLogin(email, password) {
+  try {
+    <span class="code-comment">// Authenticate user</span>
+    const response = await authService.login(email, password);
+    
+    if (response.success) {
+      const userId = response.userId;
+      
+      <span class="code-comment">// Smartech tracking</span>
+      <span class="code-highlight">smartech.login(userId)</span>;
+      <span class="code-highlight">smartech.trackEvent("user_login", {
+        user_id: userId,
+        email: email,
+        login_time: new Date().toISOString()
+      })</span>;
+      
+      <span class="code-comment">// Navigate to home</span>
+      navigateToHome();
+    }
+  } catch (error) {
+    showError(error);
+  }
+}
+                </div>
+            </div>
+
+            <div class="code-section">
+                <div class="code-title">✍️ Registration Flow</div>
+                <div class="code-block">
+ function handleRegistration(userData) {
+  try {
+    <span class="code-comment">// Create new account</span>
+    const response = await authService.register(userData);
+    
+    if (response.success) {
+      const userId = response.userId;
+      
+      <span class="code-comment">// Smartech tracking</span>
+      <span class="code-highlight">smartech.login(userId)</span>;
+      <span class="code-highlight">smartech.trackEvent("user_registration", {
+        user_id: userId,
+        email: userData.email,
+        name: userData.name,
+        registration_time: new Date().toISOString()
+      })</span>;
+      
+      <span class="code-comment">// Navigate to onboarding</span>
+      navigateToOnboarding();
+    }
+  } catch (error) {
+    showError(error);
+  }
+}
+                </div>
+            </div>
+        </div>
+
+        <!-- Scene 9: Documentation Links -->
+        <div class="scene" id="scene9">
+            <div class="title">Documentation Resources</div>
+            <div class="subtitle">smartech.login() & trackEvent() Documentation</div>
+            
+            <div class="docs-section">
+                <div class="doc-card" onclick="window.open('https://developer.netcorecloud.com/docs/flutter-new-user-event-tracking#user-tracking', '_blank')">
+                    <div class="doc-icon">📱</div>
+                    <div class="doc-title">Flutter</div>
+                    <a class="doc-link" href="https://developer.netcorecloud.com/docs/flutter-new-user-event-tracking#user-tracking" target="_blank">
+                        docs.netcoresmartech.com/docs/flutter-sdk
+                    </a>
+                </div>
+
+                <div class="doc-card" onclick="window.open('https://developer.netcorecloud.com/docs/user-tracking-1#3-login-event', '_blank')">
+                    <div class="doc-icon">🤖</div>
+                    <div class="doc-title">Native Android</div>
+                    <a class="doc-link" href="https://developer.netcorecloud.com/docs/user-tracking-1#3-login-event" target="_blank">
+                        docs.netcoresmartech.com/docs/android-sdk
+                    </a>
+                </div>
+
+                <div class="doc-card" onclick="window.open('https://developer.netcorecloud.com/docs/user-tracking#4-login-event', '_blank')">
+                    <div class="doc-icon">🍎</div>
+                    <div class="doc-title">Native iOS</div>
+                    <a class="doc-link" href="https://developer.netcorecloud.com/docs/user-tracking#4-login-event" target="_blank">
+                        docs.netcoresmartech.com/docs/ios-sdk
+                    </a>
+                </div>
+
+                <div class="doc-card" onclick="https://developer.netcorecloud.com/docs/react-native-user-event-tracking#3-login-event', '_blank')">
+                    <div class="doc-icon">⚛️</div>
+                    <div class="doc-title">React Native</div>
+                    <a class="doc-link" href="https://developer.netcorecloud.com/docs/react-native-user-event-tracking#3-login-event" target="_blank">
+                        docs.netcoresmartech.com/docs/react-native-sdk
+                    </a>
+                </div>
+            </div>
+
+            <div style="margin-top: 50px; font-size: 28px; color: #FC5E02; font-weight: bold;">
+                📚 Click any card to view full documentation
+            </div>
+        </div>
+    </div>
+
+    <!-- Progress Bar -->
+    <div class="progress-bar">
+        <div class="progress-fill" id="progressFill"></div>
+    </div>
+
+    <!-- Voiceover Text -->
+    <div class="voiceover-text" id="voiceoverText"></div>
+
+    <!-- Navigation Buttons -->
+    <div class="navigation">
+        <button class="nav-button" id="prevBtn" onclick="previousSlide()">
+            ← Previous
+        </button>
+        <div class="page-indicator">
+            <span id="currentPage">1</span> / <span id="totalPages">9</span>
+        </div>
+        <button class="nav-button" id="nextBtn" onclick="nextSlide()">
+            Next →
+        </button>
+    </div>
+
+    <script>
+        const scenes = [
+            {
+                id: 'scene1',
+                voiceover: "Let's understand how to properly track user authentication with Smartech"
+            },
+            {
+                id: 'scene2',
+                voiceover: "When an existing user successfully logs in, follow this four-step flow"
+            },
+            {
+                id: 'scene3',
+                voiceover: "After authentication, first call smartech.login, then track the user_login event"
+            },
+            {
+                id: 'scene4',
+                voiceover: "For new user registration, the flow is similar with four steps"
+            },
+            {
+                id: 'scene5',
+                voiceover: "After successful signup, first call smartech.login, then track the user_registration event"
+            },
+            {
+                id: 'scene6',
+                voiceover: "Both scenarios follow the same pattern: login first, then track the event"
+            },
+            {
+                id: 'scene7',
+                voiceover: "This approach ensures proper user identification and complete analytics tracking"
+            },
+            {
+                id: 'scene8',
+                voiceover: "Here's how it looks in a real implementation with error handling"
+            },
+            {
+                id: 'scene9',
+                voiceover: "Visit our documentation for detailed implementation guides for your framework"
+            }
+        ];
+
+        let currentScene = 0;
+        const totalScenes = scenes.length;
+        const voiceoverElement = document.getElementById('voiceoverText');
+        const progressFill = document.getElementById('progressFill');
+        const currentPageElement = document.getElementById('currentPage');
+        const totalPagesElement = document.getElementById('totalPages');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+
+        // Set total pages
+        totalPagesElement.textContent = totalScenes;
+
+        function showScene(index) {
+            // Hide all scenes
+            document.querySelectorAll('.scene').forEach(scene => {
+                scene.classList.remove('active');
+            });
+
+            // Show current scene
+            const scene = scenes[index];
+            document.getElementById(scene.id).classList.add('active');
+            
+            // Update voiceover
+            voiceoverElement.textContent = scene.voiceover;
+            
+            // Update progress
+            const progress = ((index + 1) / totalScenes) * 100;
+            progressFill.style.width = progress + '%';
+
+            // Update page indicator
+            currentPageElement.textContent = index + 1;
+
+            // Update button states
+            prevBtn.disabled = index === 0;
+            nextBtn.disabled = index === totalScenes - 1;
+        }
+
+        function nextSlide() {
+            if (currentScene < totalScenes - 1) {
+                currentScene++;
+                showScene(currentScene);
+            }
+        }
+
+        function previousSlide() {
+            if (currentScene > 0) {
+                currentScene--;
+                showScene(currentScene);
+            }
+        }
+
+        // Initialize
+        showScene(0);
+
+        // Allow keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+                nextSlide();
+            } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+                previousSlide();
+            }
+        });
+    </script>
+</body>
+</html>
