@@ -821,6 +821,9 @@ function getStepsForPlatform(platform) {
     function loadUseCase(url, element) {
         document.getElementById('useCaseFrame').src = url;
         
+        // Update URL hash to enable direct linking
+        window.location.hash = url;
+        
         // Update active state in sidebar
         const items = document.querySelectorAll('#useCasesSidebar .sidebar-item');
         items.forEach(item => item.classList.remove('active'));
@@ -839,7 +842,15 @@ function getStepsForPlatform(platform) {
     }
 
     function init() {
+      // Check if there's a hash (direct link to a page)
+      const hash = window.location.hash.slice(1);
       const savedState = localStorage.getItem('walkthroughState');
+      
+      // If there's a hash, prioritize it over saved state
+      if (hash && hash.startsWith('usecases/')) {
+        return; // Let initFromHash handle this
+      }
+      
       if (savedState) {
         try {
           // Hide intro screen if we have saved state (returning user)
@@ -928,7 +939,71 @@ function getStepsForPlatform(platform) {
       });
     });
 
+    // Handle hash-based routing for bookmarkable URLs
+    window.addEventListener('hashchange', () => {
+        const hash = window.location.hash.slice(1); // Remove '#' prefix
+        if (hash && hash.startsWith('usecases/')) {
+            // Switch to usecases tab
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(t => {
+                t.classList.remove('active');
+                if (t.getAttribute('data-platform') === 'usecases') {
+                    t.classList.add('active');
+                }
+            });
+            currentPlatform = 'usecases';
+            const stepContainer = document.querySelector('.step-container');
+            const useCasesContainer = document.getElementById('useCasesContainer');
+            stepContainer.style.display = 'none';
+            useCasesContainer.style.display = 'flex';
+            
+            // Load the specific use case
+            const url = 'usecases/' + hash.substring(10); // Remove 'usecases/' and re-add it
+            if (url.startsWith('usecases/usecases/')) {
+                loadUseCase('usecases/' + hash.substring(10));
+            } else {
+                loadUseCase(hash);
+            }
+        }
+    });
+
+    // Check for hash on page load
+    function initFromHash() {
+        const hash = window.location.hash.slice(1); // Remove '#' prefix
+        if (hash && hash.startsWith('usecases/')) {
+            // Hide intro screen
+            document.getElementById('introScreen').style.display = 'none';
+            
+            currentPlatform = 'usecases';
+            const stepContainer = document.querySelector('.step-container');
+            const useCasesContainer = document.getElementById('useCasesContainer');
+            stepContainer.style.display = 'none';
+            useCasesContainer.style.display = 'flex';
+            
+            // Update tabs
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(t => {
+                t.classList.remove('active');
+                if (t.getAttribute('data-platform') === 'usecases') {
+                    t.classList.add('active');
+                }
+            });
+            
+            document.getElementById('useCaseFrame').src = hash;
+            
+            // Mark active sidebar item
+            const items = document.querySelectorAll('#useCasesSidebar .sidebar-item');
+            items.forEach(item => item.classList.remove('active'));
+            items.forEach(item => {
+                if (item.getAttribute('onclick') && item.getAttribute('onclick').includes(hash)) {
+                    item.classList.add('active');
+                }
+            });
+        }
+    }
+
     init();
+    initFromHash(); // Apply hash-based routing after init
   </script>
 
 </body>
