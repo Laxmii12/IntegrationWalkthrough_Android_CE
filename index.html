@@ -715,7 +715,11 @@ function getStepsForPlatform(platform) {
     function loadStep(index, startTime = 0) {
   if (index < 0 || index >= currentSteps.length) return;
   
+  currentStep = index;
   updateSidebarHighlight(index);
+
+  // Update URL hash for bookmarkable steps
+  window.location.hash = `${currentPlatform}/step/${index}`;
 
   const step = currentSteps[index];
 
@@ -942,8 +946,9 @@ function getStepsForPlatform(platform) {
     // Handle hash-based routing for bookmarkable URLs
     window.addEventListener('hashchange', () => {
         const hash = window.location.hash.slice(1); // Remove '#' prefix
+        
         if (hash && hash.startsWith('usecases/')) {
-            // Switch to usecases tab
+            // Handle usecase routing
             const tabs = document.querySelectorAll('.tab');
             tabs.forEach(t => {
                 t.classList.remove('active');
@@ -964,12 +969,43 @@ function getStepsForPlatform(platform) {
             } else {
                 loadUseCase(hash);
             }
+        } else if (hash && hash.includes('/step/')) {
+            // Handle step-based routing (e.g., "native-ios/step/0")
+            const parts = hash.split('/step/');
+            if (parts.length === 2) {
+                const platform = parts[0];
+                const stepIndex = parseInt(parts[1]);
+                
+                if (isNaN(stepIndex)) return;
+                
+                // Switch platform if needed
+                if (currentPlatform !== platform) {
+                    const tabs = document.querySelectorAll('.tab');
+                    tabs.forEach(t => {
+                        t.classList.remove('active');
+                        if (t.getAttribute('data-platform') === platform) {
+                            t.classList.add('active');
+                        }
+                    });
+                    currentPlatform = platform;
+                    currentSteps = getStepsForPlatform(currentPlatform);
+                    const stepContainer = document.querySelector('.step-container');
+                    const useCasesContainer = document.getElementById('useCasesContainer');
+                    stepContainer.style.display = 'flex';
+                    useCasesContainer.style.display = 'none';
+                    renderSidebar();
+                }
+                
+                // Load the specific step
+                loadStep(stepIndex);
+            }
         }
     });
 
     // Check for hash on page load
     function initFromHash() {
         const hash = window.location.hash.slice(1); // Remove '#' prefix
+        
         if (hash && hash.startsWith('usecases/')) {
             // Hide intro screen
             document.getElementById('introScreen').style.display = 'none';
@@ -999,6 +1035,43 @@ function getStepsForPlatform(platform) {
                     item.classList.add('active');
                 }
             });
+        } else if (hash && hash.includes('/step/')) {
+            // Handle step-based routing on page load
+            const parts = hash.split('/step/');
+            if (parts.length === 2) {
+                const platform = parts[0];
+                const stepIndex = parseInt(parts[1]);
+                
+                if (isNaN(stepIndex)) return;
+                
+                // Hide intro screen
+                document.getElementById('introScreen').style.display = 'none';
+                
+                // Switch to the correct platform
+                currentPlatform = platform;
+                currentSteps = getStepsForPlatform(currentPlatform);
+                
+                // Update tabs
+                const tabs = document.querySelectorAll('.tab');
+                tabs.forEach(t => {
+                    t.classList.remove('active');
+                    if (t.getAttribute('data-platform') === currentPlatform) {
+                        t.classList.add('active');
+                    }
+                });
+                
+                const stepContainer = document.querySelector('.step-container');
+                const useCasesContainer = document.getElementById('useCasesContainer');
+                stepContainer.style.display = 'flex';
+                useCasesContainer.style.display = 'none';
+                
+                renderSidebar();
+                
+                // Load the specific step
+                if (stepIndex >= 0 && stepIndex < currentSteps.length) {
+                    loadStep(stepIndex);
+                }
+            }
         }
     }
 
