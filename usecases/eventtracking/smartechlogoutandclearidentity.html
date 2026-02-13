@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smartech Logout And Clear Identity Flow</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #ffffff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden;
+        }
+
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background: #230f2e;
+            padding: 10px 20px;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .header-logo {
+            height: 40px;
+            width: auto;
+        }
+
+        .container {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            padding-top: 60px;
+        }
+
+        .scene {
+            position: absolute;
+            width: 100%;
+            height: calc(100% - 60px);
+            top: 60px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            opacity: 0;
+            transition: opacity 0.8s ease-in-out;
+            padding: 40px 20px 250px 20px;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .scene.active {
+            opacity: 1;
+            pointer-events: auto;
+            z-index: 10;
+        }
+
+        .title {
+            font-size: 40px;
+            font-weight: bold;
+            color: #230f2e;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .subtitle {
+            font-size: 22px;
+            color: #230f2e;
+            margin-bottom: 30px;
+            text-align: center;
+            max-width: 980px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 12px 22px;
+            border-radius: 10px;
+            border: 2px solid #FC5E02;
+        }
+
+        .flow-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 24px;
+            flex-wrap: wrap;
+            margin: 20px 0 0;
+        }
+
+        .flow-box {
+            background: white;
+            border: 3px solid #230f2e;
+            border-radius: 14px;
+            padding: 20px;
+            min-width: 240px;
+            max-width: 320px;
+            text-align: center;
+            box-shadow: 0 8px 24px rgba(35, 15, 46, 0.15);
+        }
+
+        .flow-box-strong {
+            background: #230f2e;
+            color: white;
+            border-color: #FC5E02;
+        }
+
+        .flow-label {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #230f2e;
+        }
+
+        .flow-box-strong .flow-label {
+            color: #FC5E02;
+        }
+
+        .flow-text {
+            font-size: 15px;
+            line-height: 1.45;
+            color: #555;
+        }
+
+        .flow-box-strong .flow-text {
+            color: #fff;
+        }
+
+        .flow-arrow {
+            font-size: 42px;
+            color: #FC5E02;
+            font-weight: bold;
+        }
+
+        .sequence-container {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            max-width: 980px;
+            width: 100%;
+            margin: 10px 0;
+        }
+
+        .sequence-step {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            background: white;
+            border: 3px solid #230f2e;
+            border-radius: 14px;
+            padding: 20px 24px;
+        }
+
+        .sequence-step-highlight {
+            background: #230f2e;
+            border-color: #FC5E02;
+        }
+
+        .step-badge {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #FC5E02;
+            color: white;
+            font-size: 20px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .step-title {
+            font-size: 22px;
+            font-weight: bold;
+            color: #230f2e;
+            margin-bottom: 6px;
+        }
+
+        .sequence-step-highlight .step-title {
+            color: #FC5E02;
+        }
+
+        .step-description {
+            font-size: 16px;
+            color: #555;
+            line-height: 1.45;
+        }
+
+        .sequence-step-highlight .step-description {
+            color: white;
+        }
+
+        .code-section {
+            background: #f5f5f5;
+            border: 3px solid #FC5E02;
+            border-radius: 14px;
+            padding: 26px;
+            max-width: 980px;
+            width: 100%;
+            margin: 10px 0 24px;
+        }
+
+        .code-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #230f2e;
+            margin-bottom: 16px;
+        }
+
+        .code-block {
+            background: #230f2e;
+            color: white;
+            border-radius: 10px;
+            padding: 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 16px;
+            line-height: 1.75;
+        }
+
+        .code-comment {
+            color: #b6b6b6;
+        }
+
+        .code-highlight {
+            background: #FC5E02;
+            border-radius: 3px;
+            padding: 2px 6px;
+            font-weight: bold;
+        }
+
+        .note-card {
+            max-width: 980px;
+            width: 100%;
+            background: #fff3cd;
+            border: 2px solid #FC5E02;
+            border-left: 6px solid #FC5E02;
+            border-radius: 10px;
+            padding: 20px 24px;
+            color: #230f2e;
+            line-height: 1.5;
+            font-size: 18px;
+        }
+
+        .note-title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(280px, 1fr));
+            gap: 24px;
+            max-width: 980px;
+            width: 100%;
+            margin-top: 8px;
+        }
+
+        .comparison-card {
+            background: white;
+            border: 3px solid #230f2e;
+            border-radius: 14px;
+            padding: 22px;
+        }
+
+        .comparison-card h3 {
+            font-size: 26px;
+            color: #230f2e;
+            margin-bottom: 10px;
+        }
+
+        .comparison-card p {
+            font-size: 17px;
+            color: #444;
+            line-height: 1.5;
+        }
+
+        .benefit-box {
+            background: white;
+            border: 2px solid #FC5E02;
+            border-left: 6px solid #FC5E02;
+            border-radius: 10px;
+            padding: 22px;
+            max-width: 980px;
+            width: 100%;
+            font-size: 21px;
+            color: #230f2e;
+            margin: 10px 0;
+        }
+
+        .docs-section {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(280px, 1fr));
+            gap: 28px;
+            max-width: 980px;
+            width: 100%;
+            margin-top: 8px;
+        }
+
+        .doc-card {
+            background: white;
+            border: 3px solid #FC5E02;
+            border-radius: 14px;
+            padding: 26px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+
+        .doc-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 26px rgba(252, 94, 2, 0.26);
+        }
+
+        .doc-title {
+            font-size: 28px;
+            font-weight: bold;
+            color: #230f2e;
+            margin-bottom: 12px;
+        }
+
+        .doc-link {
+            color: #FC5E02;
+            text-decoration: none;
+            font-size: 16px;
+            word-break: break-all;
+        }
+
+        .doc-link:hover {
+            text-decoration: underline;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #e0e0e0;
+            position: fixed;
+            bottom: 70px;
+            left: 0;
+            z-index: 1000;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: #FC5E02;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .voiceover-text {
+            position: fixed;
+            bottom: 90px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(35, 15, 46, 0.95);
+            color: white;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 18px;
+            max-width: 90%;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            border: 2px solid #FC5E02;
+            z-index: 1000;
+        }
+
+        .navigation {
+            position: fixed;
+            bottom: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .nav-button {
+            background: #230f2e;
+            color: white;
+            border: 2px solid #FC5E02;
+            padding: 10px 20px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .nav-button:hover {
+            background: #FC5E02;
+            transform: scale(1.05);
+        }
+
+        .nav-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .nav-button:disabled:hover {
+            background: #230f2e;
+            transform: scale(1);
+        }
+
+        .page-indicator {
+            background: white;
+            color: #230f2e;
+            border: 2px solid #230f2e;
+            border-radius: 8px;
+            padding: 10px 20px;
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        @media (max-width: 900px) {
+            .title {
+                font-size: 30px;
+            }
+
+            .subtitle {
+                font-size: 18px;
+            }
+
+            .comparison-grid,
+            .docs-section {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <img src="../../assets/netcorelogo.png" class="header-logo" alt="NETCORE">
+    </div>
+
+    <div class="container">
+        <div class="scene active" id="scene1">
+            <div class="title">Logout Tracking And Identity Cleanup</div>
+            <div class="subtitle">Correct implementation of user logout analytics with smartech.logoutAndClearIdentity(true or false)</div>
+            <div class="flow-row">
+                <div class="flow-box flow-box-strong">
+                    <div class="flow-label">Step 1</div>
+                    <div class="flow-text">Track custom event in identified state</div>
+                </div>
+                <div class="flow-arrow">-></div>
+                <div class="flow-box flow-box-strong">
+                    <div class="flow-label">Step 2</div>
+                    <div class="flow-text">Clear identity with logoutAndClearIdentity(flag)</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="scene" id="scene2">
+            <div class="title">Why Order Matters</div>
+            <div class="subtitle">If identity is cleared before your custom event, the user_logout event cannot be attributed to the identified user</div>
+            <div class="note-card">
+                <div class="note-title">Critical Behavior</div>
+                `smartech.logoutAndClearIdentity()` internally triggers a system logout event, but that internal event is not visible on the dashboard. 
+                For analytics and segmentation, explicitly send `user_logout` before clearing identity.
+            </div>
+            <div class="flow-row">
+                <div class="flow-box">
+                    <div class="flow-label">Wrong Sequence</div>
+                    <div class="flow-text">logoutAndClearIdentity() first<br/>trackEvent("user_logout") later</div>
+                </div>
+                <div class="flow-box flow-box-strong">
+                    <div class="flow-label">Correct Sequence</div>
+                    <div class="flow-text">trackEvent("user_logout", payload) first<br/>logoutAndClearIdentity(flag) second</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="scene" id="scene3">
+            <div class="title">Recommended Logout Flow</div>
+            <div class="subtitle">Call this sequence when user taps the Logout action in your app</div>
+            <div class="sequence-container">
+                <div class="sequence-step">
+                    <div class="step-badge">1</div>
+                    <div>
+                        <div class="step-title">User taps Logout</div>
+                        <div class="step-description">App receives a confirmed logout intent from identified user session.</div>
+                    </div>
+                </div>
+                <div class="sequence-step sequence-step-highlight">
+                    <div class="step-badge">2</div>
+                    <div>
+                        <div class="step-title">smartech.trackEvent("user_logout", eventPayload)</div>
+                        <div class="step-description">This captures logout in identified state and keeps it visible for dashboard analytics.</div>
+                    </div>
+                </div>
+                <div class="sequence-step sequence-step-highlight">
+                    <div class="step-badge">3</div>
+                    <div>
+                        <div class="step-title">smartech.logoutAndClearIdentity(true or false)</div>
+                        <div class="step-description">Then clear user identity and apply your chosen post-logout tracking behavior.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="scene" id="scene4">
+            <div class="title">Code Example</div>
+            <div class="subtitle">Track logout event first, then clear identity</div>
+            <div class="code-section">
+                <div class="code-title">Implementation Pattern</div>
+                <div class="code-block">
+<span class="code-comment">// Called on explicit user logout</span>
+function handleLogout(currentUser) {
+  const eventPayload = {
+    user_id: currentUser.id,
+    email: currentUser.email,
+    logout_time: new Date().toISOString(),
+    logout_source: "settings_screen"
+  };
+
+  <span class="code-highlight">smartech.trackEvent("user_logout", eventPayload)</span>;
+
+  <span class="code-comment">// true: stop tracking to previous identity after logout</span>
+  <span class="code-highlight">smartech.logoutAndClearIdentity(true)</span>;
+
+  navigateToLogin();
+}
+                </div>
+            </div>
+            <div class="note-card">
+                Your custom `user_logout` event is what you will use for dashboard reporting and downstream analytics.
+            </div>
+        </div>
+
+        <div class="scene" id="scene5">
+            <div class="title">Flag Behavior: true vs false</div>
+            <div class="subtitle">Choose the argument based on whether you want post-logout activity tracking</div>
+            <div class="comparison-grid">
+                <div class="comparison-card">
+                    <h3>logoutAndClearIdentity(true)</h3>
+                    <p>Use this when you do not want to keep tracking activity after logout against the previous identity.</p>
+                </div>
+                <div class="comparison-card">
+                    <h3>logoutAndClearIdentity(false)</h3>
+                    <p>Use this when you want to continue tracking post-logout activity in your chosen logout-state behavior.</p>
+                </div>
+            </div>
+            <div class="note-card" style="margin-top: 20px;">
+                Keep the same ordering in both cases: `trackEvent("user_logout")` first, `logoutAndClearIdentity(flag)` second.
+            </div>
+        </div>
+
+        <div class="scene" id="scene6">
+            <div class="title">Why Track user_logout First</div>
+            <div class="subtitle">Business and analytics reasons for explicit custom event tracking before identity cleanup</div>
+            <div class="benefit-box">1. Event attribution remains tied to identified user profile at logout time.</div>
+            <div class="benefit-box">2. You can build reports for logout trends, churn indicators, and session-end behavior.</div>
+            <div class="benefit-box">3. The internal system logout call is not visible in dashboard analytics, so custom event is required.</div>
+        </div>
+
+        <div class="scene" id="scene7">
+            <div class="title">Complete Logout Handler</div>
+            <div class="subtitle">Full example with defensive checks</div>
+            <div class="code-section">
+                <div class="code-title">Logout Utility</div>
+                <div class="code-block">
+function onUserLogout(currentUser, trackPostLogoutActivity) {
+  if (!currentUser || !currentUser.id) {
+    return;
+  }
+
+  const eventPayload = {
+    user_id: currentUser.id,
+    logout_time: new Date().toISOString()
+  };
+
+  <span class="code-highlight">smartech.trackEvent("user_logout", eventPayload)</span>;
+  <span class="code-highlight">smartech.logoutAndClearIdentity(!trackPostLogoutActivity)</span>;
+}
+                </div>
+            </div>
+            <div class="note-card">
+                In this example, `trackPostLogoutActivity = false` maps to `logoutAndClearIdentity(true)`.
+            </div>
+        </div>
+
+        <div class="scene" id="scene8">
+            <div class="title">Documentation Resources</div>
+            <div class="subtitle">Platform-specific references for logout tracking and identity cleanup</div>
+            <div class="docs-section">
+                <div class="doc-card" onclick="window.open('https://developer.netcorecloud.com/docs/user-tracking-1#5-logout-event', '_blank')">
+                    <div class="doc-title">Native Android</div>
+                    <a class="doc-link" href="https://developer.netcorecloud.com/docs/user-tracking-1#5-logout-event" target="_blank">
+                        developer.netcorecloud.com/docs/user-tracking-1#5-logout-event
+                    </a>
+                </div>
+                <div class="doc-card" onclick="window.open('https://developer.netcorecloud.com/docs/user-tracking#6-logout-event', '_blank')">
+                    <div class="doc-title">Native iOS</div>
+                    <a class="doc-link" href="https://developer.netcorecloud.com/docs/user-tracking#6-logout-event" target="_blank">
+                        developer.netcorecloud.com/docs/user-tracking#6-logout-event
+                    </a>
+                </div>
+                <div class="doc-card" onclick="window.open('https://developer.netcorecloud.com/docs/react-native-user-event-tracking#5-logout-event', '_blank')">
+                    <div class="doc-title">React Native</div>
+                    <a class="doc-link" href="https://developer.netcorecloud.com/docs/react-native-user-event-tracking#5-logout-event" target="_blank">
+                        developer.netcorecloud.com/docs/react-native-user-event-tracking#5-logout-event
+                    </a>
+                </div>
+                <div class="doc-card" onclick="window.open('https://developer.netcorecloud.com/docs/flutter-new-user-event-tracking', '_blank')">
+                    <div class="doc-title">Flutter</div>
+                    <a class="doc-link" href="https://developer.netcorecloud.com/docs/flutter-new-user-event-tracking" target="_blank">
+                        developer.netcorecloud.com/docs/flutter-new-user-event-tracking
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="progress-bar">
+        <div class="progress-fill" id="progressFill"></div>
+    </div>
+
+    <div class="voiceover-text" id="voiceoverText"></div>
+
+    <div class="navigation">
+        <button class="nav-button" id="prevBtn" onclick="previousSlide()">Previous</button>
+        <div class="page-indicator"><span id="currentPage">1</span> / <span id="totalPages">8</span></div>
+        <button class="nav-button" id="nextBtn" onclick="nextSlide()">Next</button>
+    </div>
+
+    <script>
+        const scenes = [
+            {
+                id: 'scene1',
+                voiceover: 'This guide covers the correct logout tracking sequence with Smartech.'
+            },
+            {
+                id: 'scene2',
+                voiceover: 'Event order matters. Track user_logout before clearing identity.'
+            },
+            {
+                id: 'scene3',
+                voiceover: 'Use this three-step flow whenever an identified user logs out.'
+            },
+            {
+                id: 'scene4',
+                voiceover: 'The code pattern is custom event first, then logoutAndClearIdentity.'
+            },
+            {
+                id: 'scene5',
+                voiceover: 'Choose true or false based on post-logout tracking requirements.'
+            },
+            {
+                id: 'scene6',
+                voiceover: 'The custom logout event is essential because internal system logout is not dashboard-visible.'
+            },
+            {
+                id: 'scene7',
+                voiceover: 'A complete handler centralizes this sequence and reduces implementation drift.'
+            },
+            {
+                id: 'scene8',
+                voiceover: 'Use platform documentation for implementation details.'
+            }
+        ];
+
+        let currentScene = 0;
+        const totalScenes = scenes.length;
+        const voiceoverElement = document.getElementById('voiceoverText');
+        const progressFill = document.getElementById('progressFill');
+        const currentPageElement = document.getElementById('currentPage');
+        const totalPagesElement = document.getElementById('totalPages');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+
+        totalPagesElement.textContent = totalScenes;
+
+        function showScene(index) {
+            document.querySelectorAll('.scene').forEach(scene => {
+                scene.classList.remove('active');
+            });
+
+            const scene = scenes[index];
+            document.getElementById(scene.id).classList.add('active');
+            voiceoverElement.textContent = scene.voiceover;
+
+            const progress = ((index + 1) / totalScenes) * 100;
+            progressFill.style.width = progress + '%';
+            currentPageElement.textContent = index + 1;
+
+            prevBtn.disabled = index === 0;
+            nextBtn.disabled = index === totalScenes - 1;
+        }
+
+        function nextSlide() {
+            if (currentScene < totalScenes - 1) {
+                currentScene++;
+                showScene(currentScene);
+            }
+        }
+
+        function previousSlide() {
+            if (currentScene > 0) {
+                currentScene--;
+                showScene(currentScene);
+            }
+        }
+
+        showScene(0);
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+                nextSlide();
+            } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+                previousSlide();
+            }
+        });
+    </script>
+</body>
+</html>
